@@ -70,7 +70,8 @@ class BuijsRulesTest {
         assertUnchanged("val f = listOf(1).fold(0) { acc,\n    x ->\n    acc + x\n}\n")
         assertUnchanged(
             "val f = listOf(1).map {\n" +
-                "    it + 1000000000 + 1000000000 + 1000000000 + 1000000000 + 1000000000 + 1000000000 + 1000\n" +
+                "    it + 1000000000 + 1000000000 + 1000000000 + " +
+                "1000000000 + 1000000000 + 1000000000 + 1000\n" +
                 "}\n",
         )
     }
