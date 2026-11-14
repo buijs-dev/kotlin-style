@@ -51,7 +51,7 @@ fun top(x: List<Int>) =
 
 ## Modules
 - `style-rules` - the rules and `KotlinStyle`, the one entry point the CLI, the Gradle plugin and
-  the stratastax code generator share. Also, a ktlint rule set (`META-INF/services`) for the ktlint
+  code generators share. Also, a ktlint rule set (`META-INF/services`) for the ktlint
   CLI and IDE plugins.
 - `style-gradle-plugin` - `dev.buijs.style`.
 - `style-cli` - `kstyle`.
@@ -101,13 +101,5 @@ With the ktlint IntelliJ plugin, add the `style-rules` jar as an external rule s
 `ktlint_official` code style: format-on-save then formats like the build.
 
 ## Generated code
-The stratastax code generator ([stratastax-codegen](https://github.com/buijs-dev/stratastax-codegen),
-plugin `dev.buijs.codegen`) formats its own output with this style;
-`stratastaxCodegen { formatGeneratedSources.set(false) }` turns that off.
-
-## Documentation
-
-The Stratastax documentation is on [docs.stratastax.dev](https://docs.stratastax.dev/). Its page there is [Style](https://docs.stratastax.dev/technical/components/style/).
-
-## Related Stratastax projects
-- [stratastax-codegen](https://github.com/buijs-dev/stratastax-codegen) - formats its generated sources with `style-rules`
+A code generator can format its output with the same style through `KotlinStyle` in `style-rules`, so generated and
+authored code look alike.
