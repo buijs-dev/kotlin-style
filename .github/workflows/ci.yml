@@ -1,0 +1,30 @@
+name: CI
+
+# Builds, tests and checks the style of every pull request to develop and main.
+on:
+  pull_request:
+    branches: [ develop, main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Java & Gradle
+        uses: buijs-dev/ci-templates/.github/actions/setup-java@main
+
+      - name: Build and check style
+        run: ./gradlew build kotlinStyleCheck --stacktrace
