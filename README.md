@@ -1,6 +1,7 @@
 # Kotlin Style
 [![](https://img.shields.io/badge/Buijs-Software-blue)](https://buijs.dev/)
 [![GitHub](https://img.shields.io/github/license/buijs-dev/kotlin-style?color=black)](https://github.com/buijs-dev/kotlin-style/blob/main/LICENSE)
+[![codecov](https://codecov.io/gh/buijs-dev/kotlin-style/graph/badge.svg?token=z2bkIG555a)](https://codecov.io/gh/buijs-dev/kotlin-style)
 
 The Kotlin style: ktlint's `ktlint_official` code style with a little extra.
 
