@@ -1,5 +1,5 @@
 plugins {
-    `maven-publish`
+    id("com.vanniktech.maven.publish")
 }
 
 group = providers.gradleProperty("conventions.group").get()
@@ -8,56 +8,55 @@ val repository = providers.gradleProperty("conventions.repository").get()
 val displayName = providers.gradleProperty("conventions.displayName").get()
 val githubUrl = "https://github.com/buijs-dev/$repository"
 
-publishing {
-    publications.withType<MavenPublication>().configureEach {
-        pom {
-            val nameConvention = if (project == rootProject) {
-                displayName
-            } else {
-                "$displayName - ${project.name}"
-            }
+// Signed only with a signing key (signingInMemoryKey or signing.keyId), so local and snapshot
+// builds need none.
+val signed =
+    providers.gradleProperty("signingInMemoryKey").isPresent ||
+        providers.gradleProperty("signing.keyId").isPresent
 
-            name.convention(nameConvention)
-            description.convention(provider { project.description })
-            url.convention(githubUrl)
+// Releases go to Maven Central (publishToMavenCentral), snapshots to Repsy
+// (publishAllPublicationsToRepsyRepository), as the buijs-dev/ci-templates publish workflows run
+// them; their credentials come from the environment those workflows set.
+mavenPublishing {
+    publishToMavenCentral(automaticRelease = true)
+    if (signed) signAllPublications()
 
-            licenses {
-                license {
-                    name = "MIT License"
-                    url = "$githubUrl/blob/main/LICENSE"
-                }
-            }
+    pom {
+        val nameConvention = if (project == rootProject) {
+            displayName
+        } else {
+            "$displayName - ${project.name}"
+        }
 
-            developers {
-                developer {
-                    id = "buijs-dev"
-                    name = "Gillian Buijs"
-                    email = "info@buijs.dev"
-                }
-            }
+        name.convention(nameConvention)
+        description.convention(provider { project.description })
+        url.convention(githubUrl)
 
-            scm {
-                connection = "scm:git:$githubUrl.git"
-                developerConnection = "scm:git:ssh://git@github.com/buijs-dev/$repository.git"
-                url = githubUrl
+        licenses {
+            license {
+                name = "MIT License"
+                url = "$githubUrl/blob/main/LICENSE"
             }
+        }
+
+        developers {
+            developer {
+                id = "buijs-dev"
+                name = "Gillian Buijs"
+                email = "info@buijs.dev"
+            }
+        }
+
+        scm {
+            connection = "scm:git:$githubUrl.git"
+            developerConnection = "scm:git:ssh://git@github.com/buijs-dev/$repository.git"
+            url = githubUrl
         }
     }
 }
 
-// Release versions go to GitHub Packages, snapshots to Repsy. Credentials come from the
-// environment set by the buijs-dev/ci-templates publish workflows.
 publishing {
     repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/buijs-dev/$repository")
-            credentials {
-                username = providers.environmentVariable("GITHUB_ACTOR").orNull
-                password = providers.environmentVariable("GITHUB_TOKEN").orNull
-            }
-        }
-
         maven {
             name = "Repsy"
             url = uri("https://repo.repsy.io/mvn/buijs-dev/maven")

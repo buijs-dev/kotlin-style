@@ -42,7 +42,7 @@ sourceSets.main {
 val testRepository = layout.buildDirectory.dir("test-repository")
 
 tasks.test {
-    dependsOn(":style-rules:publishMavenJavaPublicationToTestRepository")
+    dependsOn(":style-rules:publishMavenPublicationToTestRepository")
     systemProperty("kotlin.style.testRepository", testRepository.get().asFile.absolutePath)
     systemProperty("kotlin.style.version", project.version.toString())
 }

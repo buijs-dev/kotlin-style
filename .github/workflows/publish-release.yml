@@ -15,3 +15,5 @@ jobs:
     uses: buijs-dev/ci-templates/.github/workflows/publish-release.yml@main
     with:
       root-dir: ${{ vars.ROOT_DIR || '.' }}
+      target: maven-central
+    secrets: inherit
