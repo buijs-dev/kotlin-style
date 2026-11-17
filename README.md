@@ -52,22 +52,37 @@ fun top(x: List<Int>) =
 ```
 
 ## Modules
-- `kotlin-style-rules` (`dev.buijs.kotlinstyle:kotlin-style-rules` on Maven Central) - the rules and
+- `kotlin-style-rules` (`dev.buijs.kotlinstyle:kotlin-style-rules` on Repsy) - the rules and
   `KotlinStyle`, the one entry point the CLI, the Gradle plugin and code generators share. Also a
   ktlint rule set (`META-INF/services`) for the ktlint CLI and IDE plugins.
-- `kotlin-style-gradle-plugin` (`dev.buijs.kotlinstyle:kotlin-style-gradle-plugin` on Maven
-  Central) - the plugin `dev.buijs.kotlin-style`.
+- `kotlin-style-gradle-plugin` (`dev.buijs.kotlinstyle:kotlin-style-gradle-plugin` on Repsy) -
+  the plugin `dev.buijs.kotlin-style`.
 - `kotlin-style-cli` - `kstyle`, attached to every
   [GitHub Release](https://github.com/buijs-dev/kotlin-style/releases) as `kstyle-<version>.jar`.
 
 ## Gradle
-The plugin is on Maven Central, not on the Gradle Plugin Portal; in `settings.gradle.kts`:
+The plugin and the rule set are build tooling, published to the public Repsy repository
+`https://repo.repsy.io/buijs-dev/maven2` (releases and snapshots), not to the Gradle Plugin Portal.
+Reading it needs no credentials. In `settings.gradle.kts`:
 
 ```kotlin
 pluginManagement {
     repositories {
-        mavenCentral()
+        maven("https://repo.repsy.io/buijs-dev/maven2")
         gradlePluginPortal()
+        mavenCentral()
+    }
+}
+```
+
+A build that uses the rule set as a dependency, such as a code generator, adds the same repository
+to its dependency repositories:
+
+```kotlin
+dependencyResolutionManagement {
+    repositories {
+        maven("https://repo.repsy.io/buijs-dev/maven2")
+        mavenCentral()
     }
 }
 ```
@@ -101,7 +116,7 @@ isolated worker process: ktlint brings its own Kotlin compiler, which never reac
 classpath or the Gradle daemon.
 
 ## Command line
-The Gradle plugin and the rule set on Maven Central are the main ways to use the style. For
+The Gradle plugin and the rule set on Repsy are the main ways to use the style. For
 anything else, such as a pre-commit hook, every [GitHub Release](https://github.com/buijs-dev/kotlin-style/releases) has the
 command line `kstyle` as one executable jar (Java 25), `kstyle-<version>.jar`, with its SHA-256 in
 `kstyle-<version>.jar.sha256`:

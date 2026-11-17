@@ -14,11 +14,10 @@ val signed =
     providers.gradleProperty("signingInMemoryKey").isPresent ||
         providers.gradleProperty("signing.keyId").isPresent
 
-// Releases go to Maven Central (publishToMavenCentral), snapshots to Repsy
-// (publishAllPublicationsToRepsyRepository), as the buijs-dev/ci-templates publish workflows run
-// them; their credentials come from the environment those workflows set.
+// Releases and snapshots go to Repsy (publishAllPublicationsToRepsyRepository), as the
+// buijs-dev/ci-templates publish workflows run it; the style is build tooling and never goes to
+// Maven Central. The credentials come from the environment those workflows set.
 mavenPublishing {
-    publishToMavenCentral(automaticRelease = true)
     if (signed) signAllPublications()
 
     pom {
@@ -59,7 +58,7 @@ publishing {
     repositories {
         maven {
             name = "Repsy"
-            url = uri("https://repo.repsy.io/mvn/buijs-dev/maven")
+            url = uri("https://repo.repsy.io/buijs-dev/maven2")
             credentials {
                 username = providers.environmentVariable("REPSY_USERNAME").orNull
                 password = providers.environmentVariable("REPSY_PASSWORD").orNull
