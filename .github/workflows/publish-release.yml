@@ -1,6 +1,7 @@
 name: Publish Release
 
-# Merging the release pull request (develop into main) publishes the release to Maven Central.
+# Merging the release pull request (develop into main) publishes the release to Repsy: the style
+# is build tooling and never goes to Maven Central.
 on:
   pull_request:
     types: [ closed ]
@@ -14,9 +15,10 @@ jobs:
     uses: buijs-dev/ci-templates/.github/workflows/publish-release.yml@main
     with:
       root-dir: ${{ vars.ROOT_DIR || '.' }}
+      target: repsy
     secrets: inherit
 
-  # The kstyle command line goes with the GitHub Release, not to Maven Central.
+  # The kstyle command line goes with the GitHub Release, not to Repsy.
   upload-cli:
     needs: publish
     runs-on: ubuntu-latest
