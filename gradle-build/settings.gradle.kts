@@ -3,7 +3,7 @@ pluginManagement {
         gradlePluginPortal()
         mavenCentral()
         mavenLocal()
-        maven("https://repo.repsy.io/buijs-dev/maven2") {
+        maven("https://repo.repsy.io/mvn/buijs-dev/maven") {
             mavenContent {
                 includeGroupByRegex("dev\\.buijs.*")
             }

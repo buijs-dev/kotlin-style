@@ -62,13 +62,13 @@ fun top(x: List<Int>) =
 
 ## Gradle
 The plugin and the rule set are build tooling, published to the public Repsy repository
-`https://repo.repsy.io/buijs-dev/maven2` (releases and snapshots), not to the Gradle Plugin Portal.
+`https://repo.repsy.io/mvn/buijs-dev/maven` (releases and snapshots), not to the Gradle Plugin Portal.
 Reading it needs no credentials. In `settings.gradle.kts`:
 
 ```kotlin
 pluginManagement {
     repositories {
-        maven("https://repo.repsy.io/buijs-dev/maven2")
+        maven("https://repo.repsy.io/mvn/buijs-dev/maven")
         gradlePluginPortal()
         mavenCentral()
     }
@@ -81,7 +81,7 @@ to its dependency repositories:
 ```kotlin
 dependencyResolutionManagement {
     repositories {
-        maven("https://repo.repsy.io/buijs-dev/maven2")
+        maven("https://repo.repsy.io/mvn/buijs-dev/maven")
         mavenCentral()
     }
 }
