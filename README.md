@@ -51,17 +51,19 @@ fun top(x: List<Int>) =
 ```
 
 ## Modules
-- `style-rules` - the rules and `KotlinStyle`, the one entry point the CLI, the Gradle plugin and
+Published under the group `dev.buijs.kotlinstyle`; the CLI is not published.
+
+- `kotlin-style-rules` - the rules and `KotlinStyle`, the one entry point the CLI, the Gradle plugin and
   code generators share. Also, a ktlint rule set (`META-INF/services`) for the ktlint
   CLI and IDE plugins.
-- `style-gradle-plugin` - `dev.buijs.style`.
-- `style-cli` - `kstyle`.
+- `kotlin-style-gradle-plugin` - `dev.buijs.kotlin-style`.
+- `kotlin-style-cli` - `kstyle`.
 
 ## Gradle
 
 ```kotlin
 plugins {
-    id("dev.buijs.style")
+    id("dev.buijs.kotlin-style")
 }
 
 kotlinStyle {
@@ -88,19 +90,19 @@ classpath or the Gradle daemon.
 ## CLI
 
 ```shell
-./gradlew :style-cli:fatJar
-java -jar style-cli/build/libs/kstyle.jar check src     # exit 1 on violations
-java -jar style-cli/build/libs/kstyle.jar format src
-java -jar style-cli/build/libs/kstyle.jar format --no-preserve-line-breaks src
-java -jar style-cli/build/libs/kstyle.jar format --license-header HEADER.txt src
+./gradlew :kotlin-style-cli:fatJar
+java -jar kotlin-style-cli/build/libs/kstyle.jar check src     # exit 1 on violations
+java -jar kotlin-style-cli/build/libs/kstyle.jar format src
+java -jar kotlin-style-cli/build/libs/kstyle.jar format --no-preserve-line-breaks src
+java -jar kotlin-style-cli/build/libs/kstyle.jar format --license-header HEADER.txt src
 ```
 
 `build/` and `.gradle/` directories are skipped. Handy as a pre-commit hook.
 
 ## IntelliJ
-With the ktlint IntelliJ plugin, add the `style-rules` jar as an external rule set and use the
+With the ktlint IntelliJ plugin, add the `kotlin-style-rules` jar as an external rule set and use the
 `ktlint_official` code style: format-on-save then formats like the build.
 
 ## Generated code
-A code generator can format its output with the same style through `KotlinStyle` in `style-rules`, so generated and
+A code generator can format its output with the same style through `KotlinStyle` in `kotlin-style-rules`, so generated and
 authored code look alike.

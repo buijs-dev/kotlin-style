@@ -20,7 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   - `buijs:license-header`: every `.kt` file opens with the configured license header.
 - Line break preservation (`preserveLineBreaks`), on by default.
 - A ktlint rule set (`META-INF/services`) for the ktlint CLI and IntelliJ plugin.
-- The Gradle plugin `dev.buijs.style`, with the tasks `kotlinStyleApply` (runs on build) and `kotlinStyleCheck`,
+- The Gradle plugin `dev.buijs.kotlin-style`, with the tasks `kotlinStyleApply` (runs on build) and `kotlinStyleCheck`,
   executed in an isolated worker process.
 - The CLI `kstyle`, with the commands `check` and `format`.
 - Publishing with the vanniktech maven-publish plugin: releases to Maven Central (signed), snapshots to Repsy.
