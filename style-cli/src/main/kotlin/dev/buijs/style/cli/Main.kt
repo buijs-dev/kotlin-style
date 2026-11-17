@@ -28,11 +28,11 @@ Line breaks and blank lines already there are kept unless --no-preserve-line-bre
 With --license-header, every .kt file opens with the header in FILE: added where missing."""
 
 fun main(args: Array<String>) {
-    exitProcess(Stratafmt(System.out, System.err).run(args.toList()))
+    exitProcess(Kstyle(System.out, System.err).run(args.toList()))
 }
 
 /** The `kstyle` command; [run] returns the process exit code. */
-class Stratafmt(
+class Kstyle(
     private val out: PrintStream,
     private val err: PrintStream,
 ) {

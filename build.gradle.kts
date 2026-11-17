@@ -8,8 +8,10 @@ val kstyle = configurations.create("kstyle") { isCanBeConsumed = false }
 dependencies {
     kstyle(project(":style-cli"))
 
-    // Coverage covers the style itself; the CLI and Gradle plugin are thin wrappers around it.
+    // One coverage report over every module (build/reports/kover/report.xml, for Codecov).
     kover(project(":style-rules"))
+    kover(project(":style-cli"))
+    kover(project(":style-gradle-plugin"))
 
     dokka(project(":style-rules"))
     dokka(project(":style-gradle-plugin"))

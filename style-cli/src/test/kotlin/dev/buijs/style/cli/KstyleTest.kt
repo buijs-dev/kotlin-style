@@ -29,7 +29,7 @@ class KstyleTest {
 
     private val out = ByteArrayOutputStream()
     private val err = ByteArrayOutputStream()
-    private val cli = Stratafmt(PrintStream(out), PrintStream(err))
+    private val cli = Kstyle(PrintStream(out), PrintStream(err))
     private val unformatted = "class A(\n    @A @B val a: Int,\n)\n"
 
     @Test
@@ -74,7 +74,7 @@ class KstyleTest {
         File(dir, "src/A.kt").writeText("class A\n")
 
         // expect
-        assertThat(Stratafmt.kotlinFiles(dir).map { it.name }).containsExactly("A.kt")
+        assertThat(Kstyle.kotlinFiles(dir).map { it.name }).containsExactly("A.kt")
     }
 
     @Test
@@ -191,12 +191,12 @@ class KstyleTest {
 
         // expect
         assertThat(
-            Stratafmt.kotlinFiles(root).map { it.name },
+            Kstyle.kotlinFiles(root).map { it.name },
         ).containsExactly("B.kt", "a.gradle.kts")
         assertThat(
-            Stratafmt.kotlinFiles(File(root, "B.kt")).map { it.name },
+            Kstyle.kotlinFiles(File(root, "B.kt")).map { it.name },
         ).containsExactly("B.kt")
-        assertThat(Stratafmt.kotlinFiles(File(dir, "missing"))).isEmpty()
+        assertThat(Kstyle.kotlinFiles(File(dir, "missing"))).isEmpty()
     }
 
     @Test
