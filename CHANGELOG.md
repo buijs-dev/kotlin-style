@@ -24,4 +24,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   executed in an isolated worker process.
 - The CLI `kstyle`, with the commands `check` and `format`.
 - Publishing with the vanniktech maven-publish plugin: releases and snapshots to Repsy
-  (`https://repo.repsy.io/buijs-dev/maven2`); the `kstyle` jar on the GitHub Release.
+  (`https://repo.repsy.io/mvn/buijs-dev/maven`); the `kstyle` jar on the GitHub Release.

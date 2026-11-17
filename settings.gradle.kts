@@ -1,7 +1,7 @@
 pluginManagement {
     repositories {
         mavenLocal()
-        maven("https://repo.repsy.io/buijs-dev/maven2")
+        maven("https://repo.repsy.io/mvn/buijs-dev/maven")
         mavenCentral()
         gradlePluginPortal()
     }

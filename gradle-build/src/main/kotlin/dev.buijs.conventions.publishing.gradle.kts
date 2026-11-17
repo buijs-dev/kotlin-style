@@ -58,7 +58,7 @@ publishing {
     repositories {
         maven {
             name = "Repsy"
-            url = uri("https://repo.repsy.io/buijs-dev/maven2")
+            url = uri("https://repo.repsy.io/mvn/buijs-dev/maven")
             credentials {
                 username = providers.environmentVariable("REPSY_USERNAME").orNull
                 password = providers.environmentVariable("REPSY_PASSWORD").orNull
