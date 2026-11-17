@@ -11,8 +11,8 @@ plugins {
     `java-library`
 }
 
-// The sources and javadoc jars Maven Central requires come from dev.buijs.conventions.kotlin (withSourcesJar,
-// withJavadocJar), so the plugin adds none of its own.
+// The jars Maven Central requires: the sources from dev.buijs.conventions.kotlin
+// (withSourcesJar), and as javadoc this module's Dokka HTML, which javadoc.io shows.
 mavenPublishing {
-    configure(KotlinJvm(JavadocJar.None(), SourcesJar.None()))
+    configure(KotlinJvm(JavadocJar.Dokka("dokkaGeneratePublicationHtml"), SourcesJar.None()))
 }

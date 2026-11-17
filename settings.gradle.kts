@@ -8,6 +8,6 @@ pluginManagement {
 }
 
 includeBuild("gradle-build")
-include(":style-rules")
-include(":style-cli")
-include(":style-gradle-plugin")
+include(":kotlin-style-rules")
+include(":kotlin-style-cli")
+include(":kotlin-style-gradle-plugin")
