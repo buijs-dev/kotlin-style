@@ -125,4 +125,71 @@ class KotlinStylePluginFunctionalTest {
             File(projectDir, "build.gradle.kts").readText(),
         ).doesNotContain("/** Licensed */\n\n")
     }
+
+    @Test
+    fun `after kotlinStyleApply, kotlinStyleCheck succeeds`() {
+        project(unformatted)
+
+        runner("kotlinStyleApply").build()
+
+        assertThat(runner("kotlinStyleCheck").build().task(":kotlinStyleCheck")?.outcome)
+            .isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(File(projectDir, "extra.gradle.kts").readText()).isEqualTo(formatted)
+    }
+
+    @Test
+    fun `in a Kotlin JVM module, the sources are formatted before compiling, generated code is left alone`() {
+        val kotlinVersion = System.getProperty("kotlin.style.kotlinVersion")
+        File(projectDir, "settings.gradle.kts").writeText("rootProject.name = \"sample\"\n")
+        File(projectDir, "build.gradle.kts")
+            .writeText(
+                """
+                plugins {
+                    id("org.jetbrains.kotlin.jvm") version "$kotlinVersion"
+                    id("dev.buijs.style")
+                }
+
+                repositories {
+                    maven { url = uri("${testRepository.replace("\\", "/")}") }
+                    mavenCentral()
+                }
+
+                kotlin.sourceSets.main { kotlin.srcDir("build/generated/kotlin") }
+
+                kotlinStyle {
+                    maxLineLength.set(60)
+                    preserveLineBreaks.set(false)
+                    licenseHeader.set("/** Licensed */")
+                }
+                """.trimIndent() + "\n",
+            )
+        val source =
+            File(projectDir, "src/main/kotlin/A.kt").apply {
+                parentFile.mkdirs()
+                writeText("class A {\n\n    val a = 1\n}\n")
+            }
+
+        val generated =
+            File(projectDir, "build/generated/kotlin/G.kt").apply {
+                parentFile.mkdirs()
+                writeText("class G(\n    @Suppress(\"g\") @Deprecated(\"g\") val g: Int,\n)\n")
+            }
+
+        val generatedText = generated.readText()
+
+        val result = runner("build").build()
+
+        assertThat(result.task(":kotlinStyleApply")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.task(":compileKotlin")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.tasks.map { it.path })
+            .containsSubsequence(":kotlinStyleApply", ":compileKotlin")
+        assertThat(source.readText()).isEqualTo("/** Licensed */\n\nclass A {\n    val a = 1\n}\n")
+        assertThat(generated.readText()).isEqualTo(generatedText)
+
+        // A line over the configured 60 characters is left for a hand.
+        source.appendText("\nval text = \"${"x".repeat(60)}\"\n")
+        val failed = runner("kotlinStyleCheck").buildAndFail()
+
+        assertThat(failed.output).contains("(standard:max-line-length)")
+    }
 }

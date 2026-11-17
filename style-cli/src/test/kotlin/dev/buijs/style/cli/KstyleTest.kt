@@ -28,7 +28,8 @@ class KstyleTest {
     @field:TempDir private lateinit var dir: File
 
     private val out = ByteArrayOutputStream()
-    private val cli = Stratafmt(PrintStream(out), PrintStream(ByteArrayOutputStream()))
+    private val err = ByteArrayOutputStream()
+    private val cli = Stratafmt(PrintStream(out), PrintStream(err))
     private val unformatted = "class A(\n    @A @B val a: Int,\n)\n"
 
     @Test
@@ -79,5 +80,143 @@ class KstyleTest {
     @Test
     fun `an unknown command prints the usage and exits 2`() {
         assertThat(cli.run(listOf("lint", dir.path))).isEqualTo(2)
+    }
+
+    @Test
+    fun `without arguments, without paths or with an option missing its value, the usage and exit 2`() {
+        val header = File(dir, "HEADER.txt").apply { writeText("/** Licensed */\n") }
+
+        listOf(
+            emptyList(),
+            listOf("check"),
+            listOf("format", "--no-preserve-line-breaks"),
+            listOf("check", "--max-line-length"),
+            listOf("check", "--max-line-length", "wide", dir.path),
+            listOf("check", "--license-header"),
+            listOf("check", "--license-header", File(dir, "missing.txt").path, dir.path),
+            listOf("check", "--license-header", dir.path, dir.path),
+            listOf("check", dir.path, "--license-header", header.path),
+        ).forEach { args ->
+            err.reset()
+            val code = cli.run(args)
+            if (args.lastOrNull() == header.path) {
+                // A trailing option is still an option: the path before it is checked.
+                assertThat(code).describedAs("$args").isEqualTo(0)
+            } else {
+                assertThat(code).describedAs("$args").isEqualTo(2)
+                assertThat(err.toString()).describedAs("$args").startsWith("Usage: kstyle")
+            }
+        }
+
+        assertThat(out.toString()).doesNotContain("formatted")
+    }
+
+    @Test
+    fun `check prints every violation with its place and rule, then the total`() {
+        // given
+        File(dir, "A.kt").writeText(unformatted)
+        File(dir, "B.kt").writeText("class B\n")
+
+        // when
+        val code = cli.run(listOf("check", dir.path))
+
+        // then
+        val lines = out.toString().lines().filter { it.isNotBlank() }
+
+        assertThat(code).isEqualTo(1)
+        assertThat(lines.dropLast(1)).allMatch {
+            it.matches(Regex(".*A\\.kt:\\d+:\\d+: .+ \\([a-z]+:[a-z-]+\\)"))
+        }
+
+        assertThat(lines.last()).isEqualTo("${lines.size - 1} violation(s) in 2 file(s)")
+        assertThat(err.toString()).isEmpty()
+    }
+
+    @Test
+    fun `format names the files it changed and leaves the others untouched`() {
+        // given
+        val changed = File(dir, "A.kt").apply { writeText(unformatted) }
+
+        val styled = File(dir, "B.kt").apply { writeText("class B\n") }
+
+        val modified = styled.lastModified()
+
+        // when
+        val code = cli.run(listOf("format", changed.path, styled.path))
+
+        // then
+        assertThat(code).isEqualTo(0)
+        assertThat(out.toString().lines())
+            .contains("formatted ${changed.path}", "1 of 2 file(s) formatted")
+            .doesNotContain("formatted ${styled.path}")
+        assertThat(styled.lastModified()).isEqualTo(modified)
+    }
+
+    @Test
+    fun `max-line-length sets the limit lines are checked against`() {
+        // given
+        File(dir, "A.kt").writeText("val text = \"" + "x".repeat(50) + "\"\n")
+
+        // expect
+        assertThat(cli.run(listOf("check", dir.path))).isEqualTo(0)
+        assertThat(cli.run(listOf("check", "--max-line-length", "40", dir.path))).isEqualTo(1)
+        assertThat(out.toString()).contains("(standard:max-line-length)")
+    }
+
+    @Test
+    fun `no-preserve-line-breaks removes a blank line someone wrote, by default it stays`() {
+        // given
+        val source = "class A {\n\n    val a = 1\n}\n"
+        val file = File(dir, "A.kt").apply { writeText(source) }
+
+        // expect
+        assertThat(cli.run(listOf("format", file.path))).isEqualTo(0)
+        assertThat(file.readText()).isEqualTo(source)
+        assertThat(cli.run(listOf("format", "--no-preserve-line-breaks", file.path))).isEqualTo(0)
+        assertThat(file.readText()).isEqualTo("class A {\n    val a = 1\n}\n")
+    }
+
+    @Test
+    fun `scripts are included, the root is entered even when it is called build`() {
+        // given
+        val root = File(dir, "build").apply { mkdirs() }
+
+        File(root, "a.gradle.kts").writeText("")
+        File(root, "B.kt").writeText("")
+        File(root, "notes.txt").writeText("")
+        File(root, ".gradle").mkdirs()
+        File(root, ".gradle/C.kt").writeText("")
+        File(root, "nested/build").mkdirs()
+        File(root, "nested/build/D.kt").writeText("")
+
+        // expect
+        assertThat(
+            Stratafmt.kotlinFiles(root).map { it.name },
+        ).containsExactly("B.kt", "a.gradle.kts")
+        assertThat(
+            Stratafmt.kotlinFiles(File(root, "B.kt")).map { it.name },
+        ).containsExactly("B.kt")
+        assertThat(Stratafmt.kotlinFiles(File(dir, "missing"))).isEmpty()
+    }
+
+    @Test
+    fun `the kstyle main exits with the code of the command`() {
+        // given
+        val java = File(System.getProperty("java.home"), "bin/java").path
+        val process =
+            ProcessBuilder(
+                java,
+                "-cp",
+                System.getProperty("java.class.path"),
+                "dev.buijs.style.cli.MainKt",
+            ).redirectErrorStream(true)
+                .start()
+
+        // when
+        val output = process.inputStream.bufferedReader().readText()
+
+        // then
+        assertThat(process.waitFor()).isEqualTo(2)
+        assertThat(output).startsWith("Usage: kstyle")
     }
 }

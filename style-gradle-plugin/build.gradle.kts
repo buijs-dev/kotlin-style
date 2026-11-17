@@ -19,6 +19,8 @@ dependencies {
     // ktlint and its Kotlin compiler never reach the build's own classpath.
     compileOnly(project(":style-rules"))
 
+    // StyleWorkTest runs the work in process, with the rules on the test classpath.
+    testImplementation(project(":style-rules"))
     testImplementation(gradleTestKit())
     testImplementation(libs.bundles.test)
     testImplementation(kotlin("test"))
@@ -45,4 +47,5 @@ tasks.test {
     dependsOn(":style-rules:publishMavenPublicationToTestRepository")
     systemProperty("kotlin.style.testRepository", testRepository.get().asFile.absolutePath)
     systemProperty("kotlin.style.version", project.version.toString())
+    systemProperty("kotlin.style.kotlinVersion", libs.versions.kotlin.get())
 }
