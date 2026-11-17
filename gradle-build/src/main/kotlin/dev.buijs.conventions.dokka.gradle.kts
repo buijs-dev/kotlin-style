@@ -1,5 +1,5 @@
 plugins {
-    id("buijs.repositories")
+    id("dev.buijs.conventions.repositories")
     id("org.jetbrains.dokka")
 }
 

@@ -1,5 +1,5 @@
 plugins {
-    id("buijs.library")
+    id("dev.buijs.conventions.library")
 }
 
 description = "The Kotlin style: ktlint_official plus the custom rules"

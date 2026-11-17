@@ -1,7 +1,7 @@
 plugins {
-    id("buijs.kotlin")
-    id("buijs.repositories")
-    id("buijs.coverage")
+    id("dev.buijs.conventions.kotlin")
+    id("dev.buijs.conventions.repositories")
+    id("dev.buijs.conventions.coverage")
     application
 }
 

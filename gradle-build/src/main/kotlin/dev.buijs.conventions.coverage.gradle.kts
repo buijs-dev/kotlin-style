@@ -1,6 +1,6 @@
 plugins {
     base
-    id("buijs.repositories")
+    id("dev.buijs.conventions.repositories")
     id("org.jetbrains.kotlinx.kover")
 }
 

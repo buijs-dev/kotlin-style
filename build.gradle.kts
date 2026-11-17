@@ -1,6 +1,6 @@
 plugins {
-    id("buijs.coverage")
-    id("buijs.dokka")
+    id("dev.buijs.conventions.coverage")
+    id("dev.buijs.conventions.dokka")
 }
 
 val kstyle = configurations.create("kstyle") { isCanBeConsumed = false }
