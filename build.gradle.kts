@@ -1,6 +1,5 @@
 plugins {
     id("dev.buijs.conventions.coverage")
-    id("dev.buijs.conventions.dokka")
 }
 
 val kstyle = configurations.create("kstyle") { isCanBeConsumed = false }
@@ -12,9 +11,6 @@ dependencies {
     kover(project(":kotlin-style-rules"))
     kover(project(":kotlin-style-cli"))
     kover(project(":kotlin-style-gradle-plugin"))
-
-    dokka(project(":kotlin-style-rules"))
-    dokka(project(":kotlin-style-gradle-plugin"))
 }
 
 // kotlin-style can't apply its own plugin (it is built here), so it formats itself with
