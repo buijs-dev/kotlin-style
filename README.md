@@ -87,17 +87,25 @@ Anything under the build directory, generated code included, is left alone. The 
 isolated worker process: ktlint brings its own Kotlin compiler, which never reaches the build
 classpath or the Gradle daemon.
 
-## CLI
+## Command line
+The Gradle plugin and the rule set on Maven Central are the main ways to use the style. For
+anything else, such as a pre-commit hook, every GitHub Release has the command line `kstyle` as
+one executable jar (Java 25), with its SHA-256:
 
 ```shell
-./gradlew :kotlin-style-cli:fatJar
-java -jar kotlin-style-cli/build/libs/kstyle.jar check src     # exit 1 on violations
-java -jar kotlin-style-cli/build/libs/kstyle.jar format src
-java -jar kotlin-style-cli/build/libs/kstyle.jar format --no-preserve-line-breaks src
-java -jar kotlin-style-cli/build/libs/kstyle.jar format --license-header HEADER.txt src
+VERSION=1.0.0
+BASE=https://github.com/buijs-dev/kotlin-style/releases/download/v$VERSION
+curl -fLO "$BASE/kstyle-$VERSION.jar" -fLO "$BASE/kstyle-$VERSION.jar.sha256"
+sha256sum -c "kstyle-$VERSION.jar.sha256"      # macOS: shasum -a 256 -c
+
+java -jar kstyle-$VERSION.jar check src        # exit 1 on violations, 2 on a wrong command line
+java -jar kstyle-$VERSION.jar format src
+java -jar kstyle-$VERSION.jar format --no-preserve-line-breaks src
+java -jar kstyle-$VERSION.jar format --license-header HEADER.txt src
 ```
 
-`build/` and `.gradle/` directories are skipped. Handy as a pre-commit hook.
+`build/` and `.gradle/` directories are skipped. From a checkout, `./gradlew :kotlin-style-cli:fatJar`
+writes the same jar to `kotlin-style-cli/build/libs/kstyle.jar`.
 
 ## IntelliJ
 With the ktlint IntelliJ plugin, add the `kotlin-style-rules` jar as an external rule set and use the

@@ -15,3 +15,63 @@ jobs:
     with:
       root-dir: ${{ vars.ROOT_DIR || '.' }}
     secrets: inherit
+
+  # The kstyle command line goes with the GitHub Release, not to Maven Central.
+  upload-cli:
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          fetch-depth: 0
+
+      # publish-release.yml has no outputs. It moves the tag of the release it made to the merge
+      # commit, so a tag on the merge commit means this run released it.
+      - name: Determine release
+        id: release
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+        run: |
+          git fetch --tags --force origin
+          if ! tag=$(git describe --tags --abbrev=0 --match 'v*' "$HEAD_SHA" 2>/dev/null); then
+            echo "::notice::No v* tag on the merged commits; no command line to upload"
+            echo "upload=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [[ "$(git rev-list -n 1 "$tag")" != "$MERGE_SHA" ]] || ! gh release view "$tag" > /dev/null 2>&1; then
+            echo "::notice::$tag was not released by this merge; no command line to upload"
+            echo "upload=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          {
+            echo "upload=true"
+            echo "tag=$tag"
+            echo "version=${tag#v}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Set up Java & Gradle
+        if: steps.release.outputs.upload == 'true'
+        uses: buijs-dev/ci-templates/.github/actions/setup-java@main
+
+      - name: Build the command line
+        if: steps.release.outputs.upload == 'true'
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          ./gradlew :kotlin-style-cli:fatJar -Pversion="$VERSION" --stacktrace
+          cp kotlin-style-cli/build/libs/kstyle.jar "kstyle-$VERSION.jar"
+          sha256sum "kstyle-$VERSION.jar" > "kstyle-$VERSION.jar.sha256"
+
+      - name: Upload to the GitHub Release
+        if: steps.release.outputs.upload == 'true'
+        env:
+          TAG: ${{ steps.release.outputs.tag }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: gh release upload "$TAG" "kstyle-$VERSION.jar" "kstyle-$VERSION.jar.sha256" --clobber
