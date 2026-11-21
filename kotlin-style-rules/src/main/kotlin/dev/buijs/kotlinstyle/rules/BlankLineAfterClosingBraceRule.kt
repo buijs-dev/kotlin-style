@@ -30,10 +30,10 @@ import com.pinterest.ktlint.rule.engine.core.api.prevCodeLeaf
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 
 /**
- * A statement or declaration ending in `}`, a block, a class, a lambda, is followed
- * by a blank line before the next statement of the same block: `val x = foo.map { it }`, blank
- * line, `val y = ...`. Not before the block's own closing `}`, and only between statements on
- * separate lines.
+ * A statement or declaration ending in the `}` of braces written over several lines, a block, a
+ * class, a lambda, is followed by a blank line before the next statement of the same block. Not
+ * when the braces sit on one line (`val x = foo.filter { it }`), not before the block's own closing
+ * `}`, and only between statements on separate lines.
  */
 class BlankLineAfterClosingBraceRule :
     Rule(RuleId("$RULE_SET_ID:blank-line-after-closing-brace"), About()),
@@ -47,7 +47,10 @@ class BlankLineAfterClosingBraceRule :
             canBeAutoCorrected: Boolean,
         ) -> AutocorrectDecision,
     ) {
-        if (node.elementType !in CONTAINERS) return
+        if (node.elementType !in CONTAINERS) {
+            return
+        }
+
         val statements =
             node
                 .children20
@@ -58,16 +61,32 @@ class BlankLineAfterClosingBraceRule :
                         setOf(ElementType.LBRACE, ElementType.RBRACE, ElementType.SEMICOLON)
                 }.toList()
         statements.zipWithNext().forEach { (previous, next) ->
-            if (previous.lastCodeLeaf().elementType != ElementType.RBRACE) return@forEach
+            val closing = previous.lastCodeLeaf()
+            if (closing.elementType != ElementType.RBRACE || !closing.closesBracesOverSeveralLines()) {
+                return@forEach
+            }
+
             // The line break right after `previous`, past a comment trailing it on the same line.
             val lineBreak =
                 generateSequence(previous.treeNext) { it.treeNext }
                     .takeWhile { it != next }
                     .firstOrNull { it.isWhiteSpace20 && it.text.contains('\n') } ?: return@forEach
-            if (lineBreak.text.count { it == '\n' } >= 2) return@forEach
+            if (lineBreak.text.count { it == '\n' } >= 2) {
+                return@forEach
+            }
+
             emit(lineBreak.startOffset, "Expected a blank line after a closing brace", true)
                 .ifAutocorrectAllowed { lineBreak.replaceWhitespace("\n" + lineBreak.text) }
         }
+    }
+
+    /** Whether this `}` and its `{` are on different lines. */
+    private fun ASTNode.closesBracesOverSeveralLines(): Boolean {
+        // ktlint only formats code that parses, so a closing brace has its opening one.
+        val opening = treeParent.findChildByType(ElementType.LBRACE)!!
+        return generateSequence(opening.treeNext) { it.treeNext }
+            .takeWhile { it != this }
+            .any { it.textContains('\n') }
     }
 
     private fun ASTNode.lastCodeLeaf(): ASTNode {
@@ -75,7 +94,6 @@ class BlankLineAfterClosingBraceRule :
         // Whitespace never ends a statement, a comment may; a statement holds code before it.
         return if (leaf.isPartOfComment20) leaf.prevCodeLeaf!! else leaf
     }
-
 }
 
 private val CONTAINERS = setOf(ElementType.BLOCK, ElementType.CLASS_BODY, ElementType.FILE)

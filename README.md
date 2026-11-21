@@ -11,12 +11,13 @@ The Kotlin style: ktlint's `ktlint_official` code style with a little extra.
 | `buijs:blank-line-between-annotated-parameters` | In a multi-line primary constructor, one blank line between parameters when either is annotated.                                |
 | `buijs:single-line-lambda`                      | A lambda holding one single-line expression stays on one line when it fits, so a wrapped call chain reads one call per line.    |
 | `buijs:no-empty-line-comment`                   | Removes empty `//` comments, the old workaround to stop ktfmt from joining lines.                                               |
-| `buijs:blank-line-after-closing-brace`          | A statement ending in `}` - a block, a lambda however short - is followed by a blank line before the next statement.            |
+| `buijs:blank-line-after-closing-brace`          | A statement ending in the `}` of braces written over several lines is followed by a blank line before the next statement; one whose braces sit on one line (`val x = foo.filter { it }`) is not. |
 | `buijs:single-line-condition`                   | The condition of an `if`/`while` sits on one line. One that doesn't fit is reported for a hand to fix: extract it into a `val`. |
+| `buijs:control-statement-braces`                | An `if` statement or a loop on one line gets braces, with its body on a line of its own: never `if (x == null) return 0`. An `if` used as an expression (`val x = if (a) 1 else 2`) keeps its short form. |
 | `buijs:license-header`                          | With a license header configured, every `.kt` file opens with it (added by formatting, reported by checking); `.kts` files are left without. |
 
 Four standard rules are off, each undoing or undone by a custom rule: `no-blank-line-in-list`,
-`condition-wrapping`, and `kdoc` and `no-consecutive-comments` (both reject the `/** license */` header every file opens with). Max line length is 100; a function named in backticks (a test) doesn't count against it.
+`condition-wrapping`, and `kdoc` and `no-consecutive-comments` (both reject the `/** license */` header every file opens with). Max line length is 120; a function named in backticks (a test) doesn't count against it.
 
 Formatting keeps every line break and blank line someone wrote; it only adds them (wrapping a
 line that's too long, the blank lines above). Six more standard rules are off for that:
@@ -95,7 +96,7 @@ plugins {
 }
 
 kotlinStyle {
-    maxLineLength.set(100) // the default
+    maxLineLength.set(120) // the default
     applyOnBuild.set(true) // the default
     preserveLineBreaks.set(true) // the default
     licenseHeader.set(file("LICENSE_HEADER.txt").readText()) // off by default
@@ -148,7 +149,7 @@ settings of `KotlinStyle` go in `.editorconfig`:
 ```editorconfig
 [*.{kt,kts}]
 ktlint_code_style = ktlint_official
-max_line_length = 100
+max_line_length = 120
 ktlint_ignore_back_ticked_identifier = true
 ktlint_standard_no-blank-line-in-list = disabled
 ktlint_standard_condition-wrapping = disabled

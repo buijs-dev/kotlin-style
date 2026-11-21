@@ -65,7 +65,10 @@ class SingleLineConditionRule :
             generateSequence(
                 lpar.treeNext,
             ) { it.treeNext }.takeWhile { it != rpar }.toList()
-        if (parts.none { it.text.contains('\n') }) return
+        if (parts.none { it.text.contains('\n') }) {
+            return
+        }
+
         val leaves = parts.flatMap { it.leaves() }
 
         val unjoinable =

@@ -33,5 +33,6 @@ class BuijsRuleSetProvider : RuleSetProviderV3(RuleSetId(RULE_SET_ID)) {
             RuleProvider { NoEmptyLineCommentRule() },
             RuleProvider { BlankLineAfterClosingBraceRule() },
             RuleProvider { SingleLineConditionRule() },
+            RuleProvider { ControlStatementBracesRule() },
         )
 }

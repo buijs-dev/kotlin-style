@@ -52,7 +52,10 @@ internal fun ASTNode.replaceWhitespace(text: String) {
 /** The full text of the line this node starts on, split at the node: before and after it. */
 internal fun ASTNode.lineAround(end: ASTNode): Pair<String, String> {
     var root = this
-    while (root.treeParent != null) root = root.treeParent
+    while (root.treeParent != null) {
+        root = root.treeParent
+    }
+
     val text = root.text
     val start = startOffset
     val lineStart = text.lastIndexOf('\n', start - 1) + 1

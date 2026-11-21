@@ -62,7 +62,7 @@ class KotlinStylePluginTest {
     fun `the extension has its defaults and both tasks read it`() {
         val project = project()
 
-        assertThat(project.extension.maxLineLength.get()).isEqualTo(100)
+        assertThat(project.extension.maxLineLength.get()).isEqualTo(120)
         assertThat(project.extension.applyOnBuild.get()).isTrue()
         assertThat(project.extension.preserveLineBreaks.get()).isTrue()
         assertThat(project.extension.licenseHeader.isPresent).isFalse()

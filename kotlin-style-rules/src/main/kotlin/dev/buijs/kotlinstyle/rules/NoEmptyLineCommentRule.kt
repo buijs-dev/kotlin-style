@@ -42,7 +42,10 @@ class NoEmptyLineCommentRule :
             canBeAutoCorrected: Boolean,
         ) -> AutocorrectDecision,
     ) {
-        if (node.elementType != ElementType.EOL_COMMENT || node.text.trim() != "//") return
+        if (node.elementType != ElementType.EOL_COMMENT || node.text.trim() != "//") {
+            return
+        }
+
         emit(node.startOffset, "Empty line comment", true).ifAutocorrectAllowed {
             val before = node.treePrev?.takeIf { it.isWhiteSpace20 }
 
