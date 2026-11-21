@@ -39,7 +39,10 @@ class Kstyle(
 
     fun run(args: List<String>): Int {
         val command = args.firstOrNull()
-        if (command !in setOf("check", "format")) return usage()
+        if (command !in setOf("check", "format")) {
+            return usage()
+        }
+
         var maxLineLength = KotlinStyle.DEFAULT_MAX_LINE_LENGTH
         var preserveLineBreaks = true
         var licenseHeader: String? = null
@@ -71,7 +74,10 @@ class Kstyle(
             }
         }
 
-        if (paths.isEmpty()) return usage()
+        if (paths.isEmpty()) {
+            return usage()
+        }
+
         val files = paths.flatMap { kotlinFiles(File(it)) }
 
         val style = KotlinStyle(maxLineLength, preserveLineBreaks, licenseHeader)

@@ -158,7 +158,10 @@ class KotlinStyle internal constructor(
     fun format(file: File): Boolean {
         val original = file.readText()
         val formatted = format(original, file.path)
-        if (formatted == original) return false
+        if (formatted == original) {
+            return false
+        }
+
         file.writeText(formatted)
         return true
     }
@@ -188,7 +191,10 @@ class KotlinStyle internal constructor(
         code: Code,
         block: () -> T,
     ): T {
-        if (!preserveLineBreaks) return block()
+        if (!preserveLineBreaks) {
+            return block()
+        }
+
         multiLineLambdas.set(writtenMultiLine(code))
         try {
             return block()
@@ -239,7 +245,7 @@ class KotlinStyle internal constructor(
 
     companion object {
 
-        const val DEFAULT_MAX_LINE_LENGTH = 100
+        const val DEFAULT_MAX_LINE_LENGTH = 120
 
         /** The rule id a file without the configured license header is reported under. */
         const val LICENSE_HEADER_RULE_ID = "buijs:license-header"

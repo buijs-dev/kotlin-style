@@ -269,10 +269,44 @@ class KotlinStyleTest {
             .isEqualTo("class MyClass {\n    val x = 1\n}\n")
     }
 
+    // --- control-statement-braces
+
+    @Test
+    fun `an if statement or a loop on one line gets braces, an if expression does not`() {
+        assertThat(
+            formatted(
+                """
+                    fun f(items: List<Int>?): Int {
+                        if (items == null) return 0
+                        for (item in items) println(item)
+                        val size = if (items.isEmpty()) 0 else items.size
+                        return size
+                    }
+                    """,
+            ),
+        ).isEqualTo(
+            """
+                |fun f(items: List<Int>?): Int {
+                |    if (items == null) {
+                |        return 0
+                |    }
+                |
+                |    for (item in items) {
+                |        println(item)
+                |    }
+                |
+                |    val size = if (items.isEmpty()) 0 else items.size
+                |    return size
+                |}
+                |
+            """.trimMargin(),
+        )
+    }
+
     // --- blank-line-after-closing-brace
 
     @Test
-    fun `a statement ending in a closing brace is followed by a blank line`() {
+    fun `braces over several lines are followed by a blank line, braces on one line are not`() {
         assertThat(
             formatted(
                 """
@@ -290,7 +324,6 @@ class KotlinStyleTest {
             """
                 |fun f(items: List<Int>): Int {
                 |    val doubled = items.map { it * 2 }
-                |
                 |    val sum = doubled.sum()
                 |    if (sum > 10) {
                 |        println(sum)

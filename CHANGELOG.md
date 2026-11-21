@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ## [Unreleased]
 
 ### Added
-- `KotlinStyle`: ktlint's `ktlint_official` code style with custom rules, max line length 100, up to 10 format runs
+- `KotlinStyle`: ktlint's `ktlint_official` code style with custom rules, max line length 120, up to 10 format runs
   and an optional license header.
 - Rule set `buijs`:
   - `buijs:parameter-annotation-per-line`: every annotation and parameter on its own line in a multi-line parameter
@@ -15,8 +15,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
     constructor.
   - `buijs:single-line-lambda`: a lambda with one single-line expression stays on one line when it fits.
   - `buijs:no-empty-line-comment`: removes empty `//` comments.
-  - `buijs:blank-line-after-closing-brace`: a blank line after a statement ending in `}`.
+  - `buijs:blank-line-after-closing-brace`: a blank line after a statement ending in the `}` of braces written over
+    several lines.
   - `buijs:single-line-condition`: `if` and `while` conditions on one line.
+  - `buijs:control-statement-braces`: braces around the body of an `if` statement or a loop on one line, with the
+    body on a line of its own.
   - `buijs:license-header`: every `.kt` file opens with the configured license header.
 - Line break preservation (`preserveLineBreaks`), on by default.
 - A ktlint rule set (`META-INF/services`) for the ktlint CLI and IntelliJ plugin.

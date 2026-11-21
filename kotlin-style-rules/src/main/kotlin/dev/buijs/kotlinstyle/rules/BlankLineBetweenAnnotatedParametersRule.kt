@@ -45,9 +45,15 @@ class BlankLineBetweenAnnotatedParametersRule :
             canBeAutoCorrected: Boolean,
         ) -> AutocorrectDecision,
     ) {
-        if (!node.isMultilineParameterList) return
+        if (!node.isMultilineParameterList) {
+            return
+        }
+
         // Class constructors only: a function's parameters stay compact.
-        if (node.treeParent.elementType != ElementType.PRIMARY_CONSTRUCTOR) return
+        if (node.treeParent.elementType != ElementType.PRIMARY_CONSTRUCTOR) {
+            return
+        }
+
         val parameters =
             node.children20.filter { it.elementType == ElementType.VALUE_PARAMETER }.toList()
         parameters.zipWithNext().forEach { (previous, next) ->
@@ -59,7 +65,10 @@ class BlankLineBetweenAnnotatedParametersRule :
             val comma = next.prevCodeSibling20!!
             val after = comma.treeNext.takeIf { it.isWhiteSpace20 } ?: return@forEach
             // A comment trailing the comma on the same line keeps its place.
-            if (after.treeNext.isComment && !after.text.contains('\n')) return@forEach
+            if (after.treeNext.isComment && !after.text.contains('\n')) {
+                return@forEach
+            }
+
             if (after.text.count { it == '\n' } != 2) {
                 emit(
                     after.startOffset,

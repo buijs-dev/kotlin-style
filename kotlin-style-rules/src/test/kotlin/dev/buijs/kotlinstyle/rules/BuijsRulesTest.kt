@@ -121,17 +121,26 @@ class BuijsRulesTest {
 
     @Test
     fun `statements on one line or behind a trailing comment`() {
-        assertUnchanged("fun f() {\n    val a = run { 1 }; val b = a\n}\n")
-        assertThat(format("fun f() {\n    val a = run { 1 } // one\n    val b = a\n}\n"))
-            .isEqualTo("fun f() {\n    val a = run { 1 } // one\n\n    val b = a\n}\n")
+        assertUnchanged("fun f() {\n    if (a) {\n        b()\n    }; val c = 1\n}\n")
+        assertThat(format("fun f() {\n    if (a) {\n        b()\n    } // one\n    val c = 1\n}\n"))
+            .isEqualTo("fun f() {\n    if (a) {\n        b()\n    } // one\n\n    val c = 1\n}\n")
+    }
+
+    @Test
+    fun `braces on one line are not followed by a blank line, one written there is kept`() {
+        assertUnchanged("fun f() {\n    val a = run { 1 }\n    val b = a\n}\n")
+        assertUnchanged("fun f() {\n    val a = run { 1 } // one\n    val b = a\n}\n")
+        assertUnchanged("fun f() {\n    val a = run { 1 }\n\n    val b = a\n}\n")
+        assertUnchanged("class A {\n    fun a() {}\n    fun b() {}\n}\n")
+        assertThat(violations("fun f() {\n    val a = run { 1 }\n    val b = a\n}\n")).isEmpty()
     }
 
     @Test
     fun `comments between declarations are not statements`() {
         assertThat(
-            format("class A {\n    fun a() {}\n    /** b */\n    /* c */\n    fun b() {}\n}\n"),
+            format("class A {\n    fun a() {\n    }\n    /** b */\n    /* c */\n    fun b() {}\n}\n"),
         ).isEqualTo(
-            "class A {\n    fun a() {}\n\n    /** b */\n    /* c */\n    fun b() {}\n}\n",
+            "class A {\n    fun a() {\n    }\n\n    /** b */\n    /* c */\n    fun b() {}\n}\n",
         )
     }
 
@@ -170,5 +179,102 @@ class BuijsRulesTest {
                 "fun f(x: Int) {\n    if (listOf(x).any { it > 1 } ||\n        x == 2\n    ) {\n    }\n}",
             ),
         ).isEqualTo("fun f(x: Int) {\n    if (listOf(x).any { it > 1 } || x == 2) {\n    }\n}")
+    }
+
+    // --- control-statement-braces
+
+    @Test
+    fun `an if statement on one line gets braces, with its body on a line of its own`() {
+        // The blank line behind the new brace is the rule blank-line-after-closing-brace.
+        assertThat(format("fun f(x: Int?): Int {\n    if (x == null) return 0\n    return x\n}\n"))
+            .isEqualTo("fun f(x: Int?): Int {\n    if (x == null) {\n        return 0\n    }\n\n    return x\n}\n")
+        assertThat(violations("fun f(x: Int?): Int {\n    if (x == null) return 0\n    return x\n}\n"))
+            .containsExactly("buijs:control-statement-braces")
+    }
+
+    @Test
+    fun `every branch of an if statement on one line gets braces, an else if stays behind its else`() {
+        assertThat(format("fun f(x: Int) {\n    if (x > 1) a() else b()\n}\n"))
+            .isEqualTo("fun f(x: Int) {\n    if (x > 1) {\n        a()\n    } else {\n        b()\n    }\n}\n")
+        assertThat(format("fun f(x: Int) {\n    if (x > 1) a() else if (x < 0) b() else c()\n}\n"))
+            .isEqualTo(
+                "fun f(x: Int) {\n    if (x > 1) {\n        a()\n    } else if (x < 0) {\n        b()\n" +
+                    "    } else {\n        c()\n    }\n}\n",
+            )
+        assertThat(format("fun f(x: Int) {\n    if (x > 1) a() else if (x < 0) b()\n}\n"))
+            .isEqualTo(
+                "fun f(x: Int) {\n    if (x > 1) {\n        a()\n    } else if (x < 0) {\n        b()\n    }\n}\n",
+            )
+    }
+
+    @Test
+    fun `a branch that already has braces is left, the one without gets them`() {
+        assertThat(format("fun f(x: Int) {\n    if (x > 1) { a() } else b()\n}\n"))
+            .isEqualTo("fun f(x: Int) {\n    if (x > 1) { a() } else {\n        b()\n    }\n}\n")
+        assertUnchanged("fun f(x: Int) {\n    if (x > 1) {\n        a()\n    }\n}\n")
+        assertUnchanged("fun f(x: Int) {\n    if (x > 1) { a() } else { b() }\n}\n")
+    }
+
+    @Test
+    fun `a comment behind the statement goes into the braces with it`() {
+        assertThat(format("fun f(x: Int?): Int {\n    if (x == null) return 0 // none\n    return x\n}\n"))
+            .isEqualTo(
+                "fun f(x: Int?): Int {\n    if (x == null) {\n        return 0 // none\n    }\n\n    return x\n}\n",
+            )
+    }
+
+    @Test
+    fun `an empty else is left, a body glued to its condition or behind a comment is wrapped as it is`() {
+        assertThat(format("fun f(a: Boolean) {\n    if (a) b() else;\n}\n"))
+            .isEqualTo("fun f(a: Boolean) {\n    if (a) {\n        b()\n    } else;\n}\n")
+        // The space before the brace is left to the standard rules.
+        assertThat(format("fun f(a: Boolean) {\n    if (a)b()\n}\n"))
+            .isEqualTo("fun f(a: Boolean) {\n    if (a){\n        b()\n    }\n}\n")
+        assertThat(format("fun f(a: Boolean) {\n    if (a)/* why */ b()\n}\n"))
+            .isEqualTo("fun f(a: Boolean) {\n    if (a){\n        /* why */ b()\n    }\n}\n")
+        assertThat(format("fun f(a: Boolean) {\n    if (a) b() /* b */ else c()\n}\n"))
+            .isEqualTo(
+                "fun f(a: Boolean) {\n    if (a) {\n        b() /* b */\n    } else {\n        c()\n    }\n}\n",
+            )
+    }
+
+    @Test
+    fun `an if used as an expression keeps its short form`() {
+        assertUnchanged("val x = if (a) 1 else 2\n")
+        assertUnchanged("fun f(a: Boolean) = if (a) 1 else 2\n")
+        assertUnchanged("fun f(a: Boolean): Int {\n    return if (a) 1 else 2\n}\n")
+        assertUnchanged("fun f(a: Int) =\n    when (a) {\n        1 -> if (b) 1 else 2\n        else -> 3\n    }\n")
+        assertUnchanged("val f = listOf(1).map { if (it > 0) it else 0 }\n")
+        assertUnchanged("val f = listOf(1).map {\n    val y = it + 1\n    if (y > 0) y else 0\n}\n")
+    }
+
+    @Test
+    fun `an if statement in a lambda gets braces, unless it is the if-else the lambda ends with`() {
+        assertThat(format("val f = listOf(1).forEach {\n    if (it > 0) println(it)\n}\n"))
+            .isEqualTo("val f = listOf(1).forEach {\n    if (it > 0) {\n        println(it)\n    }\n}\n")
+        assertThat(format("val f = listOf(1).map {\n    if (it > 0) a() else b()\n    it\n}\n"))
+            .isEqualTo(
+                "val f = listOf(1).map {\n    if (it > 0) {\n        a()\n    } else {\n        b()\n    }\n\n    it\n}\n",
+            )
+    }
+
+    @Test
+    fun `a loop on one line gets braces, one without a body is left`() {
+        assertThat(format("fun f(xs: List<Int>) {\n    for (x in xs) println(x)\n}\n"))
+            .isEqualTo("fun f(xs: List<Int>) {\n    for (x in xs) {\n        println(x)\n    }\n}\n")
+        assertThat(format("fun f() {\n    while (more()) next()\n}\n"))
+            .isEqualTo("fun f() {\n    while (more()) {\n        next()\n    }\n}\n")
+        assertThat(format("fun f() {\n    do next() while (more())\n}\n"))
+            .isEqualTo("fun f() {\n    do {\n        next()\n    } while (more())\n}\n")
+        assertUnchanged("fun f() {\n    while (more());\n}\n")
+        assertUnchanged("fun f(xs: List<Int>) {\n    for (x in xs) {\n        println(x)\n    }\n}\n")
+    }
+
+    @Test
+    fun `an if or loop written over several lines is left to the standard rules`() {
+        assertUnchanged("fun f(x: Int?): Int {\n    if (x == null)\n        return 0\n    return x\n}\n")
+        assertUnchanged("fun f(xs: List<Int>) {\n    for (x in xs)\n        println(x)\n}\n")
+        assertThat(violations("fun f(x: Int?): Int {\n    if (x == null)\n        return 0\n    return x\n}\n"))
+            .isEmpty()
     }
 }

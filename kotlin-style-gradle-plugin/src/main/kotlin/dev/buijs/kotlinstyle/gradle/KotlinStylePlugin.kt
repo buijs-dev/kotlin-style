@@ -26,7 +26,7 @@ import java.util.Properties
 /** `kotlinStyle { ... }`. */
 abstract class KotlinStyleExtension {
 
-    /** The longest line the style allows; 100 by default. */
+    /** The longest line the style allows; 120 by default. */
     abstract val maxLineLength: Property<Int>
 
     /** Whether `build` runs `kotlinStyleApply` (before compiling); on by default. */
@@ -60,7 +60,7 @@ class KotlinStylePlugin : Plugin<Project> {
         with(project) {
             val extension =
                 extensions.create("kotlinStyle", KotlinStyleExtension::class.java).apply {
-                    maxLineLength.convention(100)
+                    maxLineLength.convention(120)
                     applyOnBuild.convention(true)
                     preserveLineBreaks.convention(true)
                 }
